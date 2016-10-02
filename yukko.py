@@ -291,7 +291,7 @@ def boardView(board):
 		elif currKey==ord('p'):
 			scr.addstr(0,0,("Loading CAPTCHA").ljust(windowW),curses.A_REVERSE)
 			scr.refresh()
-			post(currBoard,"nano")
+			post(currBoard,settings["text editor"])
 
 			y=0
 			selectionBarY=0
@@ -387,7 +387,7 @@ def threadView(thread):
 		elif currKey==ord('p'):
 			scr.addstr(0,0,("Loading CAPTCHA").ljust(windowW),curses.A_REVERSE)
 			scr.refresh()
-			post(thread,"nano")
+			post(thread,settings["text editor"])
 		elif currKey==ord('r'):
 			scr.addstr(0,0,("Refreshing").ljust(windowW),curses.A_REVERSE)
 			scr.refresh()
