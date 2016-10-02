@@ -59,10 +59,6 @@ def cycleNode():
 readNodes("nodeList.txt")
 cycleNode()
 
-# Errors below are reserved for local errors, they're loosely based on the Linux system errors, they are NOT server errors:
-# 1 = Operation not permitted (lack of permission)
-# 2 = No directory
-# 9 = File has been closed
 class file():
     def __init__(self, jason):
         global node
