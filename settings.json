@@ -1,0 +1,10 @@
+{
+	"download directory":"./downloads/",
+	"text editor":"nano",
+	"theme folder":"./themes/default/",
+	"max overview lines":5,
+	"max overview posts":3,
+	"default board":"overchan.technology",
+	"http proxy":"",
+	"https proxy":""
+}
