@@ -5,8 +5,13 @@ of nodes seperated by new lines in nodeList.txt and the client will cycle
 through them at random. nntp.py is the library I have written for this 
 project, it has been intentionally written in such a way that it does not 
 depend on anything in the rest of the program, this allows it 
-to be pulled out and used for other projects.  
-  
+to be pulled out and used for other projects. To start it run `./yukko.py`  
+Dependancies  
+==  
+ - Python 3  
+ - requests  
+ - pypng  
+
 Screenies  
 ==  
 ![Board overview](https://i.sli.mg/1z0JdC.png)  
