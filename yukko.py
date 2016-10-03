@@ -26,6 +26,13 @@ import png
 import array
 import postParsing
 import json
+import signal
+
+def sigint_handler(signal, frame):
+	curses.endwin()
+	exit()
+
+signal.signal(signal.SIGINT, sigint_handler)
 
 #Load settings
 with open("settings.json") as settingsFile:
