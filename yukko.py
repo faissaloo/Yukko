@@ -113,10 +113,10 @@ def threadOverviewLength(thread,ypad,offset,maxlines,maxposts):
 	return total
 
 #Like addstr but errors silently
-def drawText(y,x,string):
+def drawText(y,x,string,attributes=0):
 	global scr
 	try:
-		scr.addstr(y,x,string)
+		scr.addstr(y,x,string,attributes)
 	except curses.error:
 		pass
 	 
@@ -192,52 +192,55 @@ def boardView(board):
 				currPostX=0
 				prevThread=None
 				prevThreadHeight=0
-				for i in currBoard:
+				for iThread in currBoard:
 					#If any part of the thread hits the middle of the screen then select that
-					selected=not (selectionBarY-y<postY-y or (postY-y)+threadOverviewLength(i,3,0,settings["max overview lines"],settings["max overview posts"])-1<selectionBarY-y)
+					selected=not (selectionBarY-y<postY-y or (postY-y)+threadOverviewLength(iThread,3,0,settings["max overview lines"],settings["max overview posts"])-1<selectionBarY-y)
 					if selected:
-						selectedThread=i
-						selectedThreadHeight=threadOverviewLength(i,3,0,settings["max overview lines"],settings["max overview posts"])
+						selectedThread=iThread
+						selectedThreadHeight=threadOverviewLength(iThread,3,0,settings["max overview lines"],settings["max overview posts"])
 						if prevThread:
 							#Height of the thread before the selected thread
 							prevThreadHeight=threadOverviewLength(prevThread,3,0,settings["max overview lines"],settings["max overview posts"])
-					for ii in i.overview(settings["max overview posts"]):
-						drawText(postY-y,0,postStyle["local"]["OP" if ii.isOP else "default"]["selected" if selected else "unselected"]["seperator"]+(postStyle["local"]["OP" if ii.isOP else "default"]["selected" if selected else "unselected"]["seperator repeat"]*(windowW-len(postStyle["local"]["OP" if ii.isOP else "default"]["selected" if selected else "unselected"]["seperator"]))))
+					for iPost in iThread.overview(settings["max overview posts"]):
+						drawText(postY-y,0,postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["seperator"]+(postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["seperator repeat"]*(windowW-len(postStyle["local"]["OP" if iPost.isOP else "default"]["selected" 
+						if selected else "unselected"]["seperator"]))))
 
 						postY+=1
 					
-						drawText(postY-y,0, postStyle["local"]["OP" if ii.isOP else "default"]["selected" if selected else "unselected"]["header"].format(ii.name,ii.subject,ii.hash,
-							ii.timestamp,
+						drawText(postY-y,0, postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["header"].format(iPost.name,iPost.subject,iPost.hash,
+							iPost.timestamp,
 							#If there are files show the file count and character, otherwise don't
-							postStyle["global"]["attachment character"] if len(ii.files) else ""))
+							postStyle["global"]["attachment character"] if len(iPost.files) else ""))
 						postY+=1
 						splitText=[]
-						for iii in ii.text.split("\n"):
-							if ii.isOP:
-								for iiii in textwrap.wrap(iii,windowW-1):
-									splitText.append(iiii)
+						#Wrap the text
+						for iLine in iPost.text.split("\n"):
+							if iPost.isOP:
+								for iLineWrapped in textwrap.wrap(iLine,windowW-1):
+									splitText.append(iLineWrapped)
 							else:
-								for iiii in textwrap.wrap(iii,windowW-3):
-									splitText.append(iiii)
+								for iLineWrapped in textwrap.wrap(iLine,windowW-3):
+									splitText.append(iLineWrapped)
+						
 						#Draw the text in the post up to settings["max overview lines"]
-						for iii in range(len(splitText)):
-							if iii<settings["max overview lines"]:
-								drawText(postY-y,0,postStyle["local"]["OP" if ii.isOP else "default"]["selected" if selected else "unselected"]["body"]+splitText[iii])
+						for yText,iText in enumerate(splitText):
+							if yText<settings["max overview lines"]:
+								drawText(postY-y,0,postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["body"]+iText)
 								postY+=1
 							else:
-								drawText(postY-y,0,postStyle["local"]["OP" if ii.isOP else "default"]["selected" if selected else "unselected"]["body"]+"[POST CONTRACTED]")
+								drawText(postY-y,0,postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["body"]+"[POST CONTRACTED]")
 								postY+=1
 								break
-						drawText(postY-y,0,postStyle["local"]["OP" if ii.isOP else "default"]["selected" if selected else "unselected"]["footer"]+postStyle["local"]["OP" if ii.isOP else "default"]["selected" if selected else "unselected"]["footer repeat"]*(windowW-len(postStyle["local"]["OP" if ii.isOP else "default"]["selected" if selected else "unselected"]["footer"])))
+						drawText(postY-y,0,postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["footer"]+postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["footer repeat"]*(windowW-len(postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["footer"])))
 						postY+=1
-						prevThread=i
+						prevThread=iThread
 			else:
-				for i,j in zip(emptyBoard,range(len(emptyBoard))):
-					drawText((windowH-errorRetrievingPage.height)//2+j,(windowW-errorRetrievingPage.width)//2,i)
+				for yArt,iArt in enumerate(emptyBoard):
+					drawText((windowH-errorRetrievingPage.height)//2+yArt,(windowW-errorRetrievingPage.width)//2,iArt)
 				
 		else:
-			for i,j in zip(errorRetrievingPage,range(len(errorRetrievingPage))):
-				drawText((windowH-errorRetrievingPage.height)//2+j,(windowW-errorRetrievingPage.width)//2,i.format(currBoard.status))
+			for yArt,iArt in enumerate(errorRetrievingPage):
+				drawText((windowH-errorRetrievingPage.height)//2+yArt,(windowW-errorRetrievingPage.width)//2,iArt.format(currBoard.status))
 		currKey=0
 		scr.refresh()
 		while not (currKey==curses.KEY_UP 
@@ -333,41 +336,37 @@ def threadView(thread):
 		nextPost=None
 		selected=False
 		selectedPost=None
-		for i in thread:
+		for iPost in thread:
 			#Get the post after the selected one
 			if selected:
-				nextPost=i
+				nextPost=iPost
 				nextPostHeight=getPostHeight(nextPost,3)
 			#1D collision detection between postY and selectionBarY
-			selected=not (selectionBarY-y<postY-y or (postY-y)+getPostHeight(i,3)-1<selectionBarY-y)
+			selected=not (selectionBarY-y<postY-y or (postY-y)+getPostHeight(iPost,3)-1<selectionBarY-y)
 			if selected:
-				selectedPost=i
-				selectedPostHeight=getPostHeight(i,3)
+				selectedPost=iPost
+				selectedPostHeight=getPostHeight(iPost,3)
 				if prevPost:
 					prevPostHeight=getPostHeight(prevPost,3) #Height of the post before the selected post
-			drawText(postY-y,0,postStyle["local"]["OP" if i.isOP else "default"]["selected" if selected else "unselected"]["seperator"]+
-				(postStyle["local"]["OP" if i.isOP else "default"]["selected" if selected else "unselected"]["seperator repeat"]*(windowW-len(postStyle["local"]["OP" if i.isOP else "default"]["selected" if selected else 
-				"unselected"]["seperator"]))))
+			drawText(postY-y,0,postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["seperator"]+
+				(postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["seperator repeat"]*(windowW-len(postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["seperator"]))))
 			postY+=1
 			
-			drawText(postY-y,0, postStyle["local"]["OP" if i.isOP else "default"]["selected" if selected else "unselected"]["header"].format(i.name,i.subject,i.hash,i.timestamp,
+			drawText(postY-y,0, postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["header"].format(iPost.name,iPost.subject,iPost.hash,iPost.timestamp,
 					#If there are files show the file count and character, otherwise don't
-					postStyle["global"]["attachment character"] if len(i.files) else ""))
+					postStyle["global"]["attachment character"] if len(iPost.files) else ""))
 			postY+=1
 			splitText=[]
-			for ii in i.text.split("\n"):
-				if i.isOP:
-					for iii in textwrap.wrap(ii,windowW-1):
-						splitText.append(iii)
-				else:
-					for iii in textwrap.wrap(ii,windowW-3):
-						splitText.append(iii)
-			for ii in range(len(splitText)):
-				drawText(postY-y,0,postStyle["local"]["OP" if i.isOP else "default"]["selected" if selected else "unselected"]["body"]+splitText[ii])
+			for iLine in iPost.text.split("\n"):
+				for iLineWrapped in textwrap.wrap(iLine,windowW-(1 if iPost.isOP else 3)):
+					splitText.append(iLineWrapped)
+			
+			for iText in splitText:
+				drawText(postY-y,0,postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["body"]+iText)
 				postY+=1
-			drawText(postY-y,0,postStyle["local"]["OP" if i.isOP else "default"]["selected" if selected else "unselected"]["footer"]+postStyle["local"]["OP" if i.isOP else "default"]["selected" if selected else "unselected"]["footer repeat"]*(windowW-len(postStyle["local"]["OP" if i.isOP else "default"]["selected" if selected else "unselected"]["footer"])))
+			drawText(postY-y,0,postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["footer"]+postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["footer repeat"]*(windowW-len(postStyle["local"]["OP" if iPost.isOP else "default"]["selected" if selected else "unselected"]["footer"])))
 			postY+=1
-			prevPost=i
+			prevPost=iPost
 		scr.refresh()
 		currKey=0
 		while not (currKey==curses.KEY_UP 
@@ -420,17 +419,11 @@ def boardListView(default):
 	while True:
 		windowH,windowW=scr.getmaxyx()
 		#Background
-		for i,j in enumerate(boardListBg):
-			drawText(windowH-boardListBg.height+i,windowW-boardListBg.width,j)
+		for yArt,iArt in enumerate(boardListBg):
+			drawText(windowH-boardListBg.height+yArt,windowW-boardListBg.width,iArt)
 		
-		for i,ii in zip(boardList[scopeY:],range(scopeY,len(boardList))):
-			try:
-				if selector==ii:
-					scr.addstr(ii-scopeY,1,boardList[ii],curses.A_REVERSE)
-				else:
-					scr.addstr(ii-scopeY,1,boardList[ii])
-			except:
-				pass
+		for yBoard,iBoard in enumerate(boardList[scopeY:],scopeY):
+			drawText(yBoard-scopeY,1,iBoard,curses.A_REVERSE if selector==yBoard else 0)
 		scr.refresh()
 		currKey=0
 		while not (currKey==curses.KEY_UP 
@@ -530,12 +523,12 @@ def viewAttachments(post):
 		for i,j in enumerate(attachments):
 			drawText(windowH-attachments.height+i,windowW-attachments.width,j)
 		
-		for i in range(scopeY,len(post.files)):
-			if selector==i:
-				selectedFile=post.files[i]
-				scr.addstr(i-scopeY,1,post.files[i].fileName, curses.A_REVERSE)
-			elif i-scopeY<windowH:
-				scr.addstr(i-scopeY,1,post.files[i].fileName)
+		for yFile,iFile in enumerate(post.files[scopeY:],scopeY):
+			if selector==yFile:
+				selectedFile=iFile
+				scr.addstr(yFile-scopeY,1,iFile.fileName, curses.A_REVERSE)
+			elif yFile-scopeY<windowH:
+				scr.addstr(yFile-scopeY,1,post.iFile.fileName)
 				
 		scr.refresh()
 		currKey=0
