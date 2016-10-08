@@ -24,7 +24,7 @@ import os
 captchaID = ""
 nodeList = []
 node=""
-proxies={
+proxy={
 	"http":"",
 	"https":""
 }
@@ -33,22 +33,7 @@ proxies={
 def readNodes(nodeFile):
     global nodeList
     with open(nodeFile, 'r') as file:
-        curr_line = 0
-        for i in file:
-            curr_line += 1
-            urlToAdd = i.strip()
-            splitUrl = urlToAdd.split("://")
-            if urlToAdd[-1] != "/":
-                urlToAdd += "/"
-            if len(splitUrl) <= 1:
-                urlToAdd = "https://" + urlToAdd
-            elif splitUrl[0] != "https":
-                print(i)
-                print("Invalid protocol on line " +
-                      str(curr_line) + ", only HTTPS is supported")
-                break
-
-            nodeList.append(urlToAdd)
+        nodeList=[i.strip() for i in file]
 
 # Picks a random new node
 def cycleNode():
@@ -66,7 +51,8 @@ class file():
         self.fileName = jason["Name"]
 
     def download(self, downloadDir=""):
-        r = requests.get(self.url, proxies=proxies)
+        global proxy
+        r = requests.get(self.url, proxies=proxy)
         with open(downloadDir + self.fileName, "wb") as f:
             for i in r:
                 f.write(i)
@@ -117,7 +103,8 @@ class thread():
         return self.posts[key]
 
     def refresh(self):
-        r = requests.get(node + "thread-" + str(self[0].hash) + ".json", proxies=proxies)
+        global proxy
+        r = requests.get(node + "thread-" + str(self[0].hash) + ".json", proxies=proxy)
         self.status = r.status_code
         self.posts = []
         if self.status >= 200 and self.status < 300:
@@ -138,6 +125,7 @@ class thread():
         return postOverview
 
     def post(self, name, sub, msg, captcha, *files):
+        global proxy
         global node
         global captchaID
         filesToUpload = [("", "")]
@@ -157,7 +145,7 @@ class thread():
         header = {
         }
         r = requests.post(node + "post/" + self.parentBoard.boardname,
-                          files=filesToUpload, data=postArgs, headers=header)
+                          files=filesToUpload, data=postArgs, headers=header, proxies=proxy)
         return r.status_code
 
 
@@ -165,8 +153,9 @@ class board():
 
     def __init__(self, boardname, page):
         global node
+        global proxy
         cycleNode()
-        r = requests.get(node + boardname + "-" + str(page) + ".json", proxies=proxies)
+        r = requests.get(node + boardname + "-" + str(page) + ".json", proxies=proxy)
         self.status = r.status_code
         self.page = page
         self.boardname = boardname
@@ -179,8 +168,9 @@ class board():
 
     def refresh(self):
         global node
+        global proxy
         cycleNode()
-        r = requests.get(node + self.boardname + "-" + str(self.page) + ".json", proxies=proxies)
+        r = requests.get(node + self.boardname + "-" + str(self.page) + ".json", proxies=proxy)
         self.status = r.status_code
         self.threadOverviews = []
         if self.status >= 200 and self.status < 300:
@@ -208,6 +198,7 @@ class board():
         return self.threadOverviews[key]
 
     def post(self, name, sub, msg, captcha, *files):
+        global proxy
         global node
         global captchaID
         filesToUpload = [("", "")]
@@ -227,7 +218,7 @@ class board():
         header = {
         }
         r = requests.post(node + "post/" + self.boardname,
-                          files=filesToUpload, data=postArgs, headers=header)
+                          files=filesToUpload, data=postArgs, headers=header, proxies=proxy)
         return r.status_code
 
 
@@ -242,8 +233,9 @@ def cleanupCaptcha():
 
 def getCaptcha():
     global captchaID
+    global proxy
     cleanupCaptcha()
-    r = requests.get(node + "captcha/img", proxies=proxies)
+    r = requests.get(node + "captcha/img", proxies=proxy)
     captchaID = r.url[len(node + "captcha/"):-4]
     # Download the file
     with open("/tmp/" + captchaID + ".png", "wb") as f:
@@ -255,8 +247,9 @@ def getCaptcha():
 class boardList():
 
     def __init__(self):
+        global proxy
         cycleNode()
-        r = requests.get(node + "boards.json", proxies=proxies)
+        r = requests.get(node + "boards.json", proxies=proxy)
         self.boards = r.json()
 
     def __getitem__(self, key):

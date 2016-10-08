@@ -38,7 +38,7 @@ signal.signal(signal.SIGINT, sigint_handler)
 with open("settings.json") as settingsFile:
 	settings = json.load(settingsFile)
 
-nntp.proxies = {
+nntp.proxy = {
 	"http": settings["http proxy"],
 	"https": settings["http proxy"]
 }
