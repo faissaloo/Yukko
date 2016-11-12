@@ -60,7 +60,6 @@ class file():
 
 
 class post():
-
     def __init__(self, jason, isOP=False):
         self.isOP = isOP
         self.name = jason["PostName"]
@@ -71,18 +70,15 @@ class post():
         self.text = jason["PostMessage"]
         self.files = []
         if jason["Files"] != None:
-            for i in jason["Files"]:
-                self.files.append(file(i))
+            self.files=[file(i) for i in jason["Files"]]
 
 
 class thread():
-
     def __init__(self, jason, parentBoard):
         self.parentBoard = parentBoard
         self.posts = []
         self.posts.append(post(jason[0], True))
-        for i in jason[1:]:
-            self.posts.append(post(i))
+        self.posts.extend([post(i) for i in jason[1:]])
 
     def __len__(self):
         return len(self.posts)
@@ -112,8 +108,7 @@ class thread():
             if jason:  # Only do this if None wasn't returned
                 self.posts = []
                 self.posts.append(post(jason[0], True))
-                for i in jason[1:]:
-                    self.posts.append(post(i))
+                self.posts.extend([post(i) for i in jason[1:]])
 
     def overview(self, postCount):
         # Returns the first and last postCount posts
@@ -130,8 +125,7 @@ class thread():
         global captchaID
         filesToUpload = [("", "")]
         # Ability to use same key for multiple files
-        for i in files:
-            filesToUpload.append(("attachment_uploaded", open(i, "rb")))
+        filesToUpload.extend([("attachment_uploaded", open(i, "rb")) for i in files])
 
         postArgs = {
             "reference": self.posts[0].ID,
@@ -150,7 +144,6 @@ class thread():
 
 
 class board():
-
     def __init__(self, boardname, page):
         global node
         global proxy
@@ -163,8 +156,7 @@ class board():
         if self.status >= 200 and self.status < 300:
             jason = r.json()
             if jason:  # Only do this if None wasn't returned
-                for i in jason:
-                    self.threadOverviews.append(thread(i, self))
+                self.threadOverviews.extend([thread(i, self) for i in jason])
 
     def refresh(self):
         global node
@@ -176,8 +168,7 @@ class board():
         if self.status >= 200 and self.status < 300:
             jason = r.json()
             if jason:  # Only do this if None wasn't returned
-                for i in jason:
-                    self.threadOverviews.append(thread(i, self))
+                self.threadOverviews.extend([thread(i, self) for i in jason])
 
     def __iter__(self):
         self.iteratorIndex = 0

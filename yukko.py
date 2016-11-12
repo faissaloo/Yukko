@@ -95,36 +95,23 @@ def getPostHeight(post, ypad):
 	global windowW
 	splitText = []
 	for i in post.text.split("\n"):
-		if post.isOP:
-			for ii in textwrap.wrap(i, windowW - 1):
-				splitText.append(ii)
-		else:
-			for ii in textwrap.wrap(i, windowW - 3):
-				splitText.append(ii)
+		splitText.extend([ii for ii in textwrap.wrap(i, windowW - (1 if post.isOP else 3))])
 	return ypad + len(splitText)
 
 
 def threadLength(thread, ypad, offset):
 	# Offset is added to the total value (for stuff like op)
 	# ypad is added to each post
-	total = offset
-	for i in thread.posts:
-		total += getPostHeight(i, ypad)
-	return total
+	return offset+sum([getPostHeight(i, ypad) for i in thread.posts])
 
 
 def threadOverviewLength(thread, ypad, offset, maxlines, maxposts):
 	# Offset is added to the total value (for stuff like op)
 	# ypad is added to each post
-	total = offset
-	for i in thread.overview(3):
-		# Maxlines+1 because a message is appended to those that exceed it
-		total += min(getPostHeight(i, ypad), ypad + maxlines + 1)
-	return total
+	# Maxlines+1 because a message is appended to those that exceed it
+	return offset+sum([min(getPostHeight(i, ypad), ypad + maxlines + 1) for i in thread.overview(3)])
 
 # Like addstr but errors silently
-
-
 def drawText(y, x, string, attributes=0):
 	global scr
 	try:
@@ -268,12 +255,7 @@ def boardView(board):
 						splitText = []
 						# Wrap the text
 						for iLine in iPost.text.split("\n"):
-							if iPost.isOP:
-								for iLineWrapped in textwrap.wrap(iLine, windowW - 1):
-									splitText.append(iLineWrapped)
-							else:
-								for iLineWrapped in textwrap.wrap(iLine, windowW - 3):
-									splitText.append(iLineWrapped)
+							splitText.extend([iLineWrapped for iLineWrapped in textwrap.wrap(iLine, windowW - (1 if iPost.isOP else 3))])
 
 						# Draw the text in the post up to settings["max overview lines"]
 						for yText, iText in enumerate(splitText):
@@ -500,13 +482,12 @@ def threadView(thread):
 
 			for iText in splitText:
 				drawText(
-									postY -
-									y,
-									0,
-									postStyle["local"][
-										"OP" if iPost.isOP else "default"][
-										"selected" if selected else "unselected"]["body"] +
-									iText)
+					postY - y,
+					0,
+					postStyle["local"][
+						"OP" if iPost.isOP else "default"][
+						"selected" if selected else "unselected"]["body"] +
+						iText)
 				postY += 1
 			drawText(
 				postY -
