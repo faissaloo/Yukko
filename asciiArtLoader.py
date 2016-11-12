@@ -19,30 +19,30 @@
 #######################################################################
 class asciiImg():
 
-    def __init__(self, asciiFile):
-        self.height = 0
-        self.width = 0
-        self.data = []
-        with open(asciiFile, 'r') as file:
-            for i in file:
-                self.height += 1
-                self.width = max(len(i), self.width)
-                self.data.append(i.rstrip())  # Remove newlines and append
+	def __init__(self, asciiFile):
+		self.height = 0
+		self.width = 0
+		self.data = []
+		with open(asciiFile, 'r') as file:
+			for i in file:
+				self.height += 1
+				self.width = max(len(i), self.width)
+				self.data.append(i.rstrip())  # Remove newlines and append
 
-    def __getitem__(self, key):
-        return self.data[key]
+	def __getitem__(self, key):
+		return self.data[key]
 
-    def __iter__(self):
-        self.iteratorIndex = 0
-        return self
+	def __iter__(self):
+		self.iteratorIndex = 0
+		return self
 
-    def __next__(self):
-        if self.iteratorIndex >= len(self):
-            raise StopIteration
-        else:
-            toRet = self[self.iteratorIndex]
-            self.iteratorIndex += 1
-            return toRet
+	def __next__(self):
+		if self.iteratorIndex >= len(self):
+			raise StopIteration
+		else:
+			toRet = self[self.iteratorIndex]
+			self.iteratorIndex += 1
+			return toRet
 
-    def __len__(self):
-        return len(self.data)
+	def __len__(self):
+		return len(self.data)
