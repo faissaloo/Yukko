@@ -390,8 +390,9 @@ def boardView(board):
 			scr.attroff(curses.A_REVERSE)
 			if next_board != board:
 				board = next_board
-			page = 0
-			y = 0
+				page = 0
+				y = 0
+				selectionBarY = 0
 			currBoard = nntp.board(board, page)
 		elif currKey == ord('b'):
 			selectionBarY = 0
