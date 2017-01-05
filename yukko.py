@@ -42,6 +42,10 @@ nntp.proxy = {
 	"http": settings["http proxy"],
 	"https": settings["http proxy"]
 }
+
+nntp.header = {
+	"User-Agent":settings["user agent"]
+}
 os.environ['ESCDELAY'] = '0'
 scr = curses.initscr()
 curses.start_color()

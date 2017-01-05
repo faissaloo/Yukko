@@ -6,5 +6,6 @@
 	"max overview posts":3,
 	"default board":"overchan.technology",
 	"http proxy":"",
-	"https proxy":""
+	"https proxy":"",
+	"user agent":"Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
 }

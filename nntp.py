@@ -29,6 +29,10 @@ proxy={
 	"https":""
 }
 
+header={
+	"User-Agent":"Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"
+}
+
 # Reads nodes from a text file
 def readNodes(nodeFile):
 	global nodeList
@@ -100,7 +104,8 @@ class thread():
 
 	def refresh(self):
 		global proxy
-		r = requests.get(node + "thread-" + str(self[0].hash) + ".json", proxies=proxy)
+		global headers
+		r = requests.get(node + "thread-" + str(self[0].hash) + ".json", proxies=proxy,headers=header)
 		self.status = r.status_code
 		self.posts = []
 		if self.status >= 200 and self.status < 300:
@@ -123,6 +128,7 @@ class thread():
 		global proxy
 		global node
 		global captchaID
+		global header
 		filesToUpload = [("", "")]
 		# Ability to use same key for multiple files
 		filesToUpload.extend([("attachment_uploaded", open(i, "rb")) for i in files])
@@ -136,8 +142,6 @@ class thread():
 			"captcha_id": captchaID,
 			"pow": ""
 		}
-		header = {
-		}
 		r = requests.post(node + "post/" + self.parentBoard.boardname,
 						  files=filesToUpload, data=postArgs, headers=header, proxies=proxy)
 		return r.status_code
@@ -147,8 +151,9 @@ class board():
 	def __init__(self, boardname, page):
 		global node
 		global proxy
+		global header
 		cycleNode()
-		r = requests.get(node + boardname + "-" + str(page) + ".json", proxies=proxy)
+		r = requests.get(node + boardname + "-" + str(page) + ".json", proxies=proxy,headers=header)
 		self.status = r.status_code
 		self.page = page
 		self.boardname = boardname
@@ -161,8 +166,9 @@ class board():
 	def refresh(self):
 		global node
 		global proxy
+		global header
 		cycleNode()
-		r = requests.get(node + self.boardname + "-" + str(self.page) + ".json", proxies=proxy)
+		r = requests.get(node + self.boardname + "-" + str(self.page) + ".json", proxies=proxy,headers=header)
 		self.status = r.status_code
 		self.threadOverviews = []
 		if self.status >= 200 and self.status < 300:
@@ -192,6 +198,7 @@ class board():
 		global proxy
 		global node
 		global captchaID
+		global header
 		filesToUpload = [("", "")]
 		# Ability to use same key for multiple files
 		for i in files:
@@ -205,8 +212,6 @@ class board():
 			"captcha": captcha,
 			"captcha_id": captchaID,
 			"pow": ""
-		}
-		header = {
 		}
 		r = requests.post(node + "post/" + self.boardname,
 						  files=filesToUpload, data=postArgs, headers=header, proxies=proxy)
@@ -226,7 +231,7 @@ def getCaptcha():
 	global captchaID
 	global proxy
 	cleanupCaptcha()
-	r = requests.get(node + "captcha/img", proxies=proxy)
+	r = requests.get(node + "captcha/img", proxies=proxy,headers=header)
 	captchaID = r.url[len(node + "captcha/"):-4]
 	# Download the file
 	with open("/tmp/" + captchaID + ".png", "wb") as f:
@@ -239,8 +244,9 @@ class boardList():
 
 	def __init__(self):
 		global proxy
+		global header
 		cycleNode()
-		r = requests.get(node + "boards.json", proxies=proxy)
+		r = requests.get(node + "boards.json", proxies=proxy,headers=header)
 		self.boards = r.json()
 
 	def __getitem__(self, key):
