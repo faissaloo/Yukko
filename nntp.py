@@ -161,8 +161,12 @@ class board():
 		if self.status >= 200 and self.status < 300:
 			jason = r.json()
 			if jason:  # Only do this if None wasn't returned
-				self.threadOverviews.extend([thread(i, self) for i in jason])
-
+				#If using the new API
+				if "posts" in jason:
+					self.threadOverviews.extend([thread(i, self) for i in jason["posts"]])
+				else: # Legacy, remove once nodes upgrade
+					self.threadOverviews.extend([thread(i, self) for i in jason])
+					
 	def refresh(self):
 		global node
 		global proxy
