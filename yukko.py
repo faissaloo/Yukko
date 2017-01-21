@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ############################LICENCE###################################
-# Copyright (c) 2016 Faissal Bensefia
+# Copyright (c) 2016-2017 Faissal Bensefia
 # This file is part of Yukko.
 #
 # Yukko is free software: you can redistribute it and/or modify
