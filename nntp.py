@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ############################LICENCE###################################
-# Copyright (c) 2016-2017 Faissal Bensefia
+# Copyright (c) 2016 Faissal Bensefia
 # This file is part of Yukko.
 #
 # Yukko is free software: you can redistribute it and/or modify
@@ -105,7 +105,7 @@ class thread():
 	def refresh(self):
 		global proxy
 		global headers
-		r = requests.get(node + "thread-" + str(self[0].hash) + ".json", proxies=proxy,headers=header)
+		r = requests.get(node + "t/" + str(self[0].hash) + "/json", proxies=proxy,headers=header)
 		self.status = r.status_code
 		self.posts = []
 		if self.status >= 200 and self.status < 300:
@@ -153,7 +153,7 @@ class board():
 		global proxy
 		global header
 		cycleNode()
-		r = requests.get(node + boardname + "-" + str(page) + ".json", proxies=proxy,headers=header)
+		r = requests.get(node +"b/"+ boardname + "/" + str(page) + "/json", proxies=proxy,headers=header)
 		self.status = r.status_code
 		self.page = page
 		self.boardname = boardname
@@ -161,24 +161,20 @@ class board():
 		if self.status >= 200 and self.status < 300:
 			jason = r.json()
 			if jason:  # Only do this if None wasn't returned
-				#If using the new API
-				if "posts" in jason:
-					self.threadOverviews.extend([thread(i, self) for i in jason["posts"]])
-				else: # Legacy, remove once nodes upgrade
-					self.threadOverviews.extend([thread(i, self) for i in jason])
-					
+				self.threadOverviews.extend([thread(i, self) for i in jason["posts"]])
+
 	def refresh(self):
 		global node
 		global proxy
 		global header
 		cycleNode()
-		r = requests.get(node + self.boardname + "-" + str(self.page) + ".json", proxies=proxy,headers=header)
+		r = requests.get(node +"b/"+ self.boardname + "/" + str(self.page) + "/json", proxies=proxy,headers=header)
 		self.status = r.status_code
 		self.threadOverviews = []
 		if self.status >= 200 and self.status < 300:
 			jason = r.json()
 			if jason:  # Only do this if None wasn't returned
-				self.threadOverviews.extend([thread(i, self) for i in jason])
+				self.threadOverviews.extend([thread(i, self) for i in jason["posts"]])
 
 	def __iter__(self):
 		self.iteratorIndex = 0
@@ -245,7 +241,6 @@ def getCaptcha():
 
 
 class boardList():
-
 	def __init__(self):
 		global proxy
 		global header
